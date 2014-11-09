@@ -13,11 +13,19 @@ Once the image is built, you can test it locally:
 
 ```docker run -p 127.0.0.1:8080:8080 -p 127.0.0.1:8000:8000 -p 127.0.0.1:9000:9000 gaeimageserver```
 
-If you want to deploy the project on your AppEngine instance:
+If you want to deploy the project on your AppEngine instance, create an application app_id='YOURPROJECTNAME' under the appengine console ( https://appengine.google.com/ ) and then:
 
-```docker run -t -u gaeimageserver goapp deploy /home/GAE-Image-Server/```
+```docker run -t -i gaeimageserver /bin/bash```
 
-The dependencies are:
+Modify the name of the project in app.yaml:
+
+```sed -i 's/gae-image-server/YOURPROJECTNAME/' /home/GAE-Image-Server/app.yaml```
+
+Deploy to AppEngine:
+
+```goapp deploy /home/GAE-Image-Server/```
+
+The dependencies are (included in the built docker image):
 
 https://github.com/TomiHiltunen/GAE-Go-image-optimizer
 
