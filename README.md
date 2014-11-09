@@ -6,11 +6,11 @@ Use GAE Blobstore to host your images. Upload image and profiles (Quality/Size).
 ## Upload
 To get the "url action" to put in the upload form:
 
-```http://{img20sur20_baseURL}/action | GET```
+```http://{img_baseURL}/action | GET```
 
 Example of form to be used in the upload page:
 
-```http://{img20sur20_baseURL}/exampleForm | GET```
+```http://{baseURL}/exampleForm | GET```
 
 Of course the form will have to post the file to be uploaded, but note also the 2 important fields  that help to index the image and continue the flow:
 ```
@@ -23,7 +23,7 @@ Once the form is posted to the blobstore action, the file will be stored, and th
 ## Image Profiles
 **Retrieve the list** of existing profiles:
 
-```http://{img20sur20_baseURL}/imgProfiles | GET```
+```http://{baseURL}/imgProfiles | GET```
 
 This returns a JSON flat list containing the list of profile names:
 
@@ -36,17 +36,17 @@ This returns a JSON flat list containing the list of profile names:
 
 **Retrieve** a specific profile:
 
-```http://{img20sur20_baseURL}/imgProfile/{profileName} | GET```
+```http://{baseURL}/imgProfile/{profileName} | GET```
 
 **Delete** a specific profile:
 
-```http://{img20sur20_baseURL}/imgProfile/{profileName} | DELETE```
+```http://{baseURL}/imgProfile/{profileName} | DELETE```
 
 This removes all the files associated to the profile.
 
 **Create** or **update** a specific profile:
 ```
-http://{img20sur20_baseURL}/imgProfile | POST | JSON {
+http://{baseURL}/imgProfile | POST | JSON {
         "name" : "small",
         "quality" : 50,
         "maxSize" : 100
@@ -58,16 +58,16 @@ Note that to update a profile you need to post a JSON with the name associated t
 ## Images
 **Retrieve an image** associated to an *entityId* for a given *profile*:
 
-```http://{img20sur20_baseURL}/image/{entityId}/{profileName} | GET```
+```http://{baseURL}/image/{entityId}/{profileName} | GET```
 
 If the image does not exist for the requested profile, it will be computed on the fly, provided an *original* image is associated to the *entityId*
 
 **Delete an image** for a given profile:
 
-```http://{img20sur20_baseURL}/image/{entityId}/{profileName} | DELETE```
+```http://{baseURL}/image/{entityId}/{profileName} | DELETE```
 
 **Delete all the images** (all profiles) associated to an *entityId*:
 
-```http://{img20sur20_baseURL}/image/{entityId} | DELETE```
+```http://{baseURL}/image/{entityId} | DELETE```
 
 Note that this kind of deletion is done asynchronously using task queues. This means that the image can still be accessible for a short period.
