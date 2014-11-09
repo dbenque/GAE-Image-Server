@@ -20,7 +20,10 @@ If you want to deploy the project on your AppEngine instance:
 The dependencies are:
 
 https://github.com/TomiHiltunen/GAE-Go-image-optimizer
-https://github.com/gorilla/mux    and     https://github.com/gorilla/context
+
+https://github.com/gorilla/mux
+
+https://github.com/gorilla/context
 
 
 ## Upload
