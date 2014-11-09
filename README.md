@@ -20,7 +20,7 @@ Of course the form will have to post the file to be uploaded, but note also the 
 
 Once the form is posted to the blobstore action, the file will be stored, and the *callbackurl* will be invoked with the updated form. All the input parameters of the initial form will be transfered.
 
-## Imgage Profiles
+## Image Profiles
 **Retrieve the list** of existing profiles:
 
 ```http://{img20sur20_baseURL}/imgProfiles | GET```
