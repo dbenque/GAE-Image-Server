@@ -3,6 +3,26 @@ GAE-Image-Server
 
 Use GAE Blobstore to host your images. Upload image and profiles (Quality/Size). Serve Image for a given profile (resize on the fly).
 
+The application is written in GO and should be deployed to GAE. As the blostore requires a *callback url*, to ease local testing, you will find a Dockerfile that will allow you to run locally an AppEngine instance configured for the project. It can also be used to deploy the application.
+
+First build your image, go to the *docker* folder and type:
+
+``` docker build -t "gaeimageserver"```
+
+Once the image is built, you can test it locally:
+
+```docker run -p 127.0.0.1:8080:8080 -p 127.0.0.1:8000:8000 -p 127.0.0.1:9000:9000 gaeimageserver```
+
+If you want to deploy the project on your AppEngine instance:
+
+```docker run -t -u gaeimageserver goapp deploy /home/GAE-Image-Server/```
+
+The dependencies are:
+
+https://github.com/TomiHiltunen/GAE-Go-image-optimizer
+https://github.com/gorilla/mux    and     https://github.com/gorilla/context
+
+
 ## Upload
 To get the "url action" to put in the upload form:
 
