@@ -1,6 +1,6 @@
 FROM google/golang
 
-MAINTAINER dbenques
+MAINTAINER dbenque
 
 RUN apt-get update
 RUN apt-get -y install procps
