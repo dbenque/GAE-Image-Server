@@ -7,7 +7,7 @@ The application is written in GO and should be deployed to GAE. As the blostore 
 
 First build your image, go to the *docker* folder and type:
 
-``` docker build -t "gaeimageserver"```
+``` docker build -t "gaeimageserver" .```
 
 Once the image is built, you can test it locally:
 
