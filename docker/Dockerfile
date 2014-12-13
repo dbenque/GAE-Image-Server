@@ -37,8 +37,6 @@ EXPOSE 9000
 # Get Project Dependencies
 RUN mkdir -p $GOPATH/src/github.com/gorilla && cd $GOPATH/src/github.com/gorilla && git clone https://github.com/gorilla/mux.git && git clone https://github.com/gorilla/context.git
 
-RUN git clone https://github.com/TomiHiltunen/GAE-Go-image-optimizer.git && cd $GOPATH/src/github.com && ln -s ~/GAE-Go-image-optimizer/github.com/tomihiltunen
-
 # Get the project
 RUN git clone https://github.com/dbenque/GAE-Image-Server.git
 
