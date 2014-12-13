@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/tomihiltunen/gae-go-image-optimizer"
 
 	"appengine"
 	"appengine/blobstore"
@@ -83,7 +82,7 @@ func handleUploadedInBlobStore(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
 	// Create options to resize image
-	o := optimg.NewCompressionOptions(r)
+	o := NewCompressionOptions(r)
 
 	originalProfile := ImgProfile{Name: _OriginalProfileName}
 	if originalProfile.retrieve(&c) != nil {
@@ -101,7 +100,7 @@ func handleUploadedInBlobStore(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the resized blobs and other values
-	blobs, vals, err := optimg.ParseBlobs(o)
+	blobs, vals, err := ParseBlobs(o)
 	if err != nil {
 		serveError(c, w, err)
 		return
@@ -119,7 +118,7 @@ func handleUploadedInBlobStore(w http.ResponseWriter, r *http.Request) {
 	c.Infof("Vals: %v", vals)
 
 	// Store the Image Object
-	img := Image{EntityId: vals.Get(entityId), ProfileName: _OriginalProfileName, BlobstoreKey: blobstoreKey}
+	img := ImageInGAE{EntityId: vals.Get(entityId), ProfileName: _OriginalProfileName, BlobstoreKey: blobstoreKey}
 	img.store(&c)
 
 	client := urlfetch.Client(c)
@@ -149,7 +148,7 @@ func init() {
 	r.HandleFunc("/imgProfile/{name}", handleImgProfileDelete).Methods("DELETE")
 	r.HandleFunc("/imgProfile/{name}", handleImgProfileGet).Methods("GET")
 
-	// Image
+	// ImageInGAR
 	r.HandleFunc("/image/{entityId}/{profileName}", handleGetImage).Methods("GET")
 	r.HandleFunc("/image/{entityId}/{profileName}", handleDeleteImage).Methods("DELETE")
 	r.HandleFunc("/image/{entityId}", handleDeleteImageAllProfile).Methods("DELETE")

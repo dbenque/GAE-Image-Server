@@ -8,8 +8,9 @@ import (
 	"math"
 	"net/http"
 
+	"resize"
+
 	"github.com/gorilla/mux"
-	"github.com/tomihiltunen/resize"
 
 	"appengine"
 	"appengine/blobstore"
@@ -22,23 +23,23 @@ import (
 
 const imageKind = "image"
 
-type Image struct {
+type ImageInGAE struct {
 	EntityId     string `json:"entityId"`
 	ProfileName  string `json:"profileName"`
 	BlobstoreKey string `json:"blobstoreKey" datastore:",noindex"`
 }
 
-func (p *Image) GetKey() string {
+func (p *ImageInGAE) GetKey() string {
 	return p.EntityId + ":" + p.ProfileName
 }
-func (p *Image) GetKind() string {
+func (p *ImageInGAE) GetKind() string {
 	return imageKind
 }
-func (p *Image) store(context *appengine.Context) error {
+func (p *ImageInGAE) store(context *appengine.Context) error {
 
 	return datastoreEntity.Store(context, p)
 }
-func (p *Image) remove(context *appengine.Context) error {
+func (p *ImageInGAE) remove(context *appengine.Context) error {
 
 	if err := p.retrieve(context); err == nil {
 		if err := blobstore.Delete(*context, appengine.BlobKey(p.BlobstoreKey)); err != nil {
@@ -55,7 +56,7 @@ func (p *Image) remove(context *appengine.Context) error {
 
 	return datastoreEntity.Delete(context, p)
 }
-func (p *Image) retrieve(context *appengine.Context) error {
+func (p *ImageInGAE) retrieve(context *appengine.Context) error {
 
 	if p.ProfileName == "" {
 		p.ProfileName = _OriginalProfileName
@@ -80,7 +81,7 @@ func CreateTasksToDeleteImages(context *appengine.Context, q *datastore.Query) e
 
 	t := q.Run(*context)
 	for {
-		var p Image
+		var p ImageInGAE
 		_, err := t.Next(&p)
 		if err == datastore.Done {
 			break // No further entities match the query.
@@ -101,7 +102,7 @@ func handleDeleteImageTask(w http.ResponseWriter, r *http.Request) {
 
 	c := appengine.NewContext(r)
 	r.ParseForm()
-	img := Image{EntityId: r.PostFormValue("entityId"), ProfileName: r.PostFormValue("profileName")}
+	img := ImageInGAE{EntityId: r.PostFormValue("entityId"), ProfileName: r.PostFormValue("profileName")}
 
 	img.remove(&c)
 
@@ -112,7 +113,7 @@ func handleDeleteImage(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	c := appengine.NewContext(r)
-	img := Image{EntityId: vars["entityId"], ProfileName: vars["profileName"]}
+	img := ImageInGAE{EntityId: vars["entityId"], ProfileName: vars["profileName"]}
 
 	img.remove(&c)
 
@@ -124,7 +125,7 @@ func handleGetImage(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	c := appengine.NewContext(r)
-	img := Image{EntityId: vars["entityId"], ProfileName: vars["profileName"]}
+	img := ImageInGAE{EntityId: vars["entityId"], ProfileName: vars["profileName"]}
 
 	if err := img.retrieve(&c); err != nil {
 
@@ -145,7 +146,7 @@ func handleGetImage(w http.ResponseWriter, r *http.Request) {
 	blobstore.Send(w, appengine.BlobKey(img.BlobstoreKey))
 }
 
-func (p *Image) createResizedImage(context *appengine.Context, targetProfileName string) error {
+func (p *ImageInGAE) createResizedImage(context *appengine.Context, targetProfileName string) error {
 
 	targetProfile := ImgProfile{Name: targetProfileName}
 	if err := targetProfile.retrieve(context); err != nil {
