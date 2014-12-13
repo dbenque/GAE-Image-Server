@@ -1,7 +1,7 @@
 GAE-Image-Server
 ================
 
-Use GAE Blobstore to host your images. Upload image and profiles (Quality/Size). Serve Image for a given profile (resize on the fly).
+Use GAE Blobstore to host your images. Upload image and profiles (Quality/Size). Serve Image for a given profile (resize on the fly). Note that Quality indicator does not apply in case of png image. In that case the png format is used for storage to keep transparency. In other cases, file will be saved as jpeg.
 
 The application is written in GO and should be deployed to GAE. As the blostore requires a *callback url*, to ease local testing, you will find a Dockerfile that will allow you to run locally an AppEngine instance configured for the project. It can also be used to deploy the application.
 
@@ -26,8 +26,6 @@ Deploy to AppEngine:
 ```goapp deploy /home/GAE-Image-Server/```
 
 The dependencies are (included in the built docker image):
-
-https://github.com/TomiHiltunen/GAE-Go-image-optimizer
 
 https://github.com/gorilla/mux
 
