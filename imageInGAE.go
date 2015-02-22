@@ -8,7 +8,7 @@ import (
 	"math"
 	"net/http"
 
-	"./resize"
+	"github.com/dbenque/GAE-Image-Server/resize"
 
 	"github.com/gorilla/mux"
 
