@@ -158,7 +158,7 @@ func handleBlob(options *compressionOptions, blobOriginal *blobstore.BlobInfo) (
 			size_y = options.Size
 			size_x = int(math.Floor(float64(size_x) * float64(float64(size_y)/float64(size_y_before))))
 		}
-		img = resize.Resize(img, img.Bounds(), size_x, size_y)
+		img = resizeImage.Resize(img, img.Bounds(), size_x, size_y)
 	}
 
 	var newKey appengine.BlobKey

@@ -174,7 +174,7 @@ func (p *ImageInGAE) createResizedImage(context *appengine.Context, targetProfil
 			size_y = targetProfile.MaxSize
 			size_x = int(math.Floor(float64(size_x) * float64(float64(size_y)/float64(size_y_before))))
 		}
-		img = resize.Resize(img, img.Bounds(), size_x, size_y)
+		img = resizeImage.Resize(img, img.Bounds(), size_x, size_y)
 	}
 	// JPEG options
 	o := &jpeg.Options{Quality: targetProfile.Quality}
