@@ -5,9 +5,17 @@ Use GAE Blobstore to host your images. Upload image and profiles (Quality/Size).
 
 The application is written in GO and should be deployed to GAE. As the blostore requires a *callback url*, to ease local testing, you will find a Dockerfile that will allow you to run locally an AppEngine instance configured for the project. It can also be used to deploy the application.
 
-First build your image, go to the *docker* folder and type:
+Prerequisit, is to build the dbenque/goappengine base image. To do so:
 
-``` docker build -t "gaeimageserver" .```
+``` go get github.com/dbenque/goAppengineToolkit ```
+
+Enter the *docker* folder and:
+
+``` dbenque/goappengine ```
+
+Then build your image, go to the *docker* folder and type
+
+``` docker build --no-cache -t "gaeimageserver" .```
 
 Once the image is built, you can test it locally:
 
