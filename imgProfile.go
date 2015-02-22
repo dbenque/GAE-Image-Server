@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"datastoreEntity"
+	"github.com/dbenque/goAppengineToolkit/datastoreEntity"
 
 	"appengine"
 	"appengine/datastore"

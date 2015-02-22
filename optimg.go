@@ -38,7 +38,7 @@ import (
 
 	// 3rd-party
 	// By "Go Authors"
-	"github.com/tomihiltunen/resize"
+	"github.com/dbenque/GAE-Image-Server/resize"
 
 	// App Engine packages
 	"appengine"

@@ -8,14 +8,14 @@ import (
 	"math"
 	"net/http"
 
-	"resize"
+	"github.com/dbenque/GAE-Image-Server/resize"
 
 	"github.com/gorilla/mux"
 
 	"appengine"
 	"appengine/blobstore"
 
-	"datastoreEntity"
+	"github.com/dbenque/goAppengineToolkit/datastoreEntity"
 
 	"appengine/datastore"
 	"appengine/taskqueue"
