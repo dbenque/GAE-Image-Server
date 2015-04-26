@@ -85,7 +85,7 @@ func handleUploadedInBlobStore(w http.ResponseWriter, r *http.Request) {
 	o := NewCompressionOptions(r)
 
 	originalProfile := ImgProfile{Name: _OriginalProfileName}
-	if originalProfile.retrieve(&c) != nil {
+	if originalProfile.retrieve(c) != nil {
 		// Set max size
 		o.Size = 300
 		// Set quality
@@ -119,7 +119,7 @@ func handleUploadedInBlobStore(w http.ResponseWriter, r *http.Request) {
 
 	// Store the Image Object
 	img := ImageInGAE{EntityId: vals.Get(entityId), ProfileName: _OriginalProfileName, BlobstoreKey: blobstoreKey}
-	img.store(&c)
+	img.store(c)
 
 	client := urlfetch.Client(c)
 	_, post_err := client.PostForm(vals.Get(callbackUrl), vals)

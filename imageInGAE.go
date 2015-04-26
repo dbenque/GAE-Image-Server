@@ -35,28 +35,28 @@ func (p *ImageInGAE) GetKey() string {
 func (p *ImageInGAE) GetKind() string {
 	return imageKind
 }
-func (p *ImageInGAE) store(context *appengine.Context) error {
+func (p *ImageInGAE) store(context appengine.Context) error {
 
 	return datastoreEntity.Store(context, p)
 }
-func (p *ImageInGAE) remove(context *appengine.Context) error {
+func (p *ImageInGAE) remove(context appengine.Context) error {
 
 	if err := p.retrieve(context); err == nil {
-		if err := blobstore.Delete(*context, appengine.BlobKey(p.BlobstoreKey)); err != nil {
-			(*context).Infof("Error while removing in blobstore: %v", *p)
+		if err := blobstore.Delete(context, appengine.BlobKey(p.BlobstoreKey)); err != nil {
+			context.Infof("Error while removing in blobstore: %v", *p)
 		}
 
 		// Due to BlobStore Appengine Bug: https://code.google.com/p/googleappengine/issues/detail?id=6849
 		query := datastore.NewQuery("__BlobFileIndex__").Filter("blob_key =", appengine.BlobKey(p.BlobstoreKey)).KeysOnly()
 		var values []interface{}
-		if keys, err := query.GetAll(*context, &values); err == nil && len(keys) == 1 {
-			datastore.Delete(*context, keys[0])
+		if keys, err := query.GetAll(context, &values); err == nil && len(keys) == 1 {
+			datastore.Delete(context, keys[0])
 		}
 	}
 
 	return datastoreEntity.Delete(context, p)
 }
-func (p *ImageInGAE) retrieve(context *appengine.Context) error {
+func (p *ImageInGAE) retrieve(context appengine.Context) error {
 
 	if p.ProfileName == "" {
 		p.ProfileName = _OriginalProfileName
@@ -70,16 +70,16 @@ func handleDeleteImageAllProfile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	q := datastore.NewQuery(imageKind).Filter("EntityId =", vars["entityId"])
-	if err := CreateTasksToDeleteImages(&c, q); err != nil {
+	if err := CreateTasksToDeleteImages(c, q); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 
 }
-func CreateTasksToDeleteImages(context *appengine.Context, q *datastore.Query) error {
+func CreateTasksToDeleteImages(context appengine.Context, q *datastore.Query) error {
 
-	t := q.Run(*context)
+	t := q.Run(context)
 	for {
 		var p ImageInGAE
 		_, err := t.Next(&p)
@@ -87,12 +87,12 @@ func CreateTasksToDeleteImages(context *appengine.Context, q *datastore.Query) e
 			break // No further entities match the query.
 		}
 		if err != nil {
-			(*context).Errorf("fetching next Image: %v", err)
+			(context).Errorf("fetching next Image: %v", err)
 			break
 		}
 
 		t := taskqueue.NewPOSTTask("/image/taskDelete", map[string][]string{"entityId": {p.EntityId}, "profileName": {p.ProfileName}})
-		if _, err := taskqueue.Add((*context), t, ""); err != nil {
+		if _, err := taskqueue.Add((context), t, ""); err != nil {
 			return err
 		}
 	}
@@ -104,7 +104,7 @@ func handleDeleteImageTask(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	img := ImageInGAE{EntityId: r.PostFormValue("entityId"), ProfileName: r.PostFormValue("profileName")}
 
-	img.remove(&c)
+	img.remove(c)
 
 	w.WriteHeader(http.StatusOK)
 
@@ -115,7 +115,7 @@ func handleDeleteImage(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	img := ImageInGAE{EntityId: vars["entityId"], ProfileName: vars["profileName"]}
 
-	img.remove(&c)
+	img.remove(c)
 
 	w.WriteHeader(http.StatusOK)
 
@@ -127,33 +127,33 @@ func handleGetImage(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	img := ImageInGAE{EntityId: vars["entityId"], ProfileName: vars["profileName"]}
 
-	if err := img.retrieve(&c); err != nil {
+	if err := img.retrieve(c); err != nil {
 
 		// check if the image exist with the "original" profile
 		img.ProfileName = _OriginalProfileName
 
-		if err := img.retrieve(&c); err != nil {
+		if err := img.retrieve(c); err != nil {
 			c.Infof("Error: TODO serve a default image")
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 
 		// need to resize and serve
-		img.createResizedImage(&c, vars["profileName"])
+		img.createResizedImage(c, vars["profileName"])
 	}
 
 	// Serve Image
 	blobstore.Send(w, appengine.BlobKey(img.BlobstoreKey))
 }
 
-func (p *ImageInGAE) createResizedImage(context *appengine.Context, targetProfileName string) error {
+func (p *ImageInGAE) createResizedImage(context appengine.Context, targetProfileName string) error {
 
 	targetProfile := ImgProfile{Name: targetProfileName}
 	if err := targetProfile.retrieve(context); err != nil {
 		return err
 	}
 
-	reader := blobstore.NewReader(*context, appengine.BlobKey(p.BlobstoreKey))
+	reader := blobstore.NewReader(context, appengine.BlobKey(p.BlobstoreKey))
 
 	img, _, err := image.Decode(reader)
 
@@ -180,7 +180,7 @@ func (p *ImageInGAE) createResizedImage(context *appengine.Context, targetProfil
 	o := &jpeg.Options{Quality: targetProfile.Quality}
 
 	// get writerurn e
-	writer, err := blobstore.Create(*context, "image/jpeg")
+	writer, err := blobstore.Create(context, "image/jpeg")
 	if err != nil {
 		return err
 	}

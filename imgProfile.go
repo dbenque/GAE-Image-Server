@@ -28,14 +28,14 @@ type ImgProfileNameSet struct {
 }
 
 // retrieve the index of profiles (initialize the key if nil)
-func GetImgProfileNameSet(context *appengine.Context) ImgProfileNameSet {
+func GetImgProfileNameSet(context appengine.Context) ImgProfileNameSet {
 
-	key := datastore.NewKey(*context, "ImgProfileNameSet", "ImgProfileNameSet", 0, nil)
+	key := datastore.NewKey(context, "ImgProfileNameSet", "ImgProfileNameSet", 0, nil)
 
 	allProfiles := ImgProfileNameSet{}
 
-	if err := datastore.Get(*context, key, &allProfiles); err != nil {
-		(*context).Infof("No profile could be retrieved")
+	if err := datastore.Get(context, key, &allProfiles); err != nil {
+		(context).Infof("No profile could be retrieved")
 		return ImgProfileNameSet{}
 	}
 	return allProfiles
@@ -49,14 +49,14 @@ func (p *ImgProfile) GetKind() string {
 	return "ImgProfile"
 }
 
-func (p *ImgProfile) store(context *appengine.Context) error {
+func (p *ImgProfile) store(context appengine.Context) error {
 
 	if err := datastoreEntity.Store(context, p); err != nil {
 		return err
 	}
 
 	// Update profile index
-	keyIndex := datastore.NewKey(*context, "ImgProfileNameSet", "ImgProfileNameSet", 0, nil)
+	keyIndex := datastore.NewKey(context, "ImgProfileNameSet", "ImgProfileNameSet", 0, nil)
 	allProfilesStruct := GetImgProfileNameSet(context)
 
 	// avoid dupe insertion
@@ -71,40 +71,40 @@ func (p *ImgProfile) store(context *appengine.Context) error {
 	if !found {
 		allProfilesStruct.Index = sort.StringSlice(append(allProfilesStruct.Index, p.Name)[0:])
 		allProfilesStruct.Index.Sort()
-		if _, err := datastore.Put(*context, keyIndex, &allProfilesStruct); err != nil {
-			(*context).Errorf("Can't store index, %v", err)
+		if _, err := datastore.Put(context, keyIndex, &allProfilesStruct); err != nil {
+			(context).Errorf("Can't store index, %v", err)
 		}
 	}
 
-	(*context).Infof("Profile stored: %v", *p)
+	(context).Infof("Profile stored: %v", *p)
 
 	return nil
 }
 
-func (p *ImgProfile) remove(context *appengine.Context) error {
+func (p *ImgProfile) remove(context appengine.Context) error {
 
 	if err := datastoreEntity.Delete(context, p); err != nil {
 		return err
 	}
 
 	// Update profile index
-	keyIndex := datastore.NewKey(*context, "ImgProfileNameSet", "ImgProfileNameSet", 0, nil)
+	keyIndex := datastore.NewKey(context, "ImgProfileNameSet", "ImgProfileNameSet", 0, nil)
 	allProfilesStruct := GetImgProfileNameSet(context)
 	i := allProfilesStruct.Index.Search(p.Name)
 	if i != len(allProfilesStruct.Index) {
 		allProfilesStruct.Index = sort.StringSlice(append(allProfilesStruct.Index[:i], allProfilesStruct.Index[i+1:]...)[0:]) // remove element at i and create a StringSlice with remaining items
 		allProfilesStruct.Index.Sort()
-		if _, err := datastore.Put(*context, keyIndex, &allProfilesStruct); err != nil {
-			(*context).Errorf("Can't store index, %v", err)
+		if _, err := datastore.Put(context, keyIndex, &allProfilesStruct); err != nil {
+			(context).Errorf("Can't store index, %v", err)
 		}
 
 	}
-	(*context).Infof("Profile removed: %v", p.Name)
+	(context).Infof("Profile removed: %v", p.Name)
 
 	return nil
 }
 
-func (p *ImgProfile) retrieve(context *appengine.Context) error {
+func (p *ImgProfile) retrieve(context appengine.Context) error {
 
 	return datastoreEntity.Retrieve(context, p)
 }
@@ -115,7 +115,7 @@ func handleImgProfileGet(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
 	profile := ImgProfile{Name: vars["name"]}
-	if err := profile.retrieve(&c); err != nil {
+	if err := profile.retrieve(c); err != nil {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -138,7 +138,7 @@ func handleImgProfileStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	profile.store(&c)
+	profile.store(c)
 	w.WriteHeader(http.StatusOK)
 
 }
@@ -155,11 +155,11 @@ func handleImgProfileDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	profile.remove(&c)
+	profile.remove(c)
 
 	// Clean all associated image
 	q := datastore.NewQuery(imageKind).Filter("ProfileName =", vars["name"])
-	if err := CreateTasksToDeleteImages(&c, q); err != nil {
+	if err := CreateTasksToDeleteImages(c, q); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -170,7 +170,7 @@ func handleGetAllProfiles(w http.ResponseWriter, r *http.Request) {
 
 	c := appengine.NewContext(r)
 
-	profilesJson, _ := json.Marshal(GetImgProfileNameSet(&c).Index)
+	profilesJson, _ := json.Marshal(GetImgProfileNameSet(c).Index)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(profilesJson)
 }
