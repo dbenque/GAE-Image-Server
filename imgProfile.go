@@ -159,7 +159,7 @@ func handleImgProfileDelete(w http.ResponseWriter, r *http.Request) {
 
 	// Clean all associated image
 	q := datastore.NewQuery(imageKind).Filter("ProfileName =", vars["name"])
-	if err := CreateTasksToDeleteImages(c, q); err != nil {
+	if err := CreateTasksToDeleteImages(c, q, vars["imgbaseurl"]); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

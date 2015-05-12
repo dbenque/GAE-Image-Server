@@ -37,7 +37,8 @@ const entityId = "entityId"
 func handleFormAction(w http.ResponseWriter, r *http.Request) {
 
 	c := appengine.NewContext(r)
-	uploadURL, err := blobstore.UploadURL(c, "/uploaded", nil)
+	vars := mux.Vars(r)
+	uploadURL, err := blobstore.UploadURL(c, "/"+vars["imgbaseurl"]+"/uploaded", nil)
 	if err != nil {
 		serveError(c, w, err)
 		return
@@ -48,10 +49,10 @@ func handleFormAction(w http.ResponseWriter, r *http.Request) {
 
 func handleForm(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-
+	vars := mux.Vars(r)
 	c.Infof("In handleForm!! Before getting blobstoreURL", r.PostForm)
 
-	uploadURL, err := blobstore.UploadURL(c, "/uploaded", nil)
+	uploadURL, err := blobstore.UploadURL(c, "/"+vars["imgbaseurl"]+"/uploaded", nil)
 	if err != nil {
 		serveError(c, w, err)
 		return
@@ -106,10 +107,12 @@ func handleUploadedInBlobStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	vars := mux.Vars(r)
+
 	file := blobs["file"]
 	if len(file) == 0 {
 		c.Errorf("no file uploaded")
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/"+vars["imgbaseurl"]+"/", http.StatusFound)
 		return
 	}
 
@@ -128,7 +131,7 @@ func handleUploadedInBlobStore(w http.ResponseWriter, r *http.Request) {
 		serveError(c, w, post_err)
 		return
 	}
-	http.Redirect(w, r, "/uploaded/complete", http.StatusFound)
+	http.Redirect(w, r, "/"+vars["imgbaseurl"]+"/uploaded/complete", http.StatusFound)
 }
 
 func init() {
@@ -136,23 +139,23 @@ func init() {
 	r := mux.NewRouter()
 
 	// uploading img
-	r.HandleFunc("/action", handleFormAction)
-	r.HandleFunc("/exampleForm", handleForm)
-	r.HandleFunc("/callbacktest", handleCallbackTest)
-	r.HandleFunc("/uploaded", handleUploadedInBlobStore)
-	r.HandleFunc("/uploaded/complete", handleUploadComplete)
+	r.HandleFunc("/{imgbaseurl}/action", handleFormAction)
+	r.HandleFunc("/{imgbaseurl}/exampleForm", handleForm)
+	r.HandleFunc("/{imgbaseurl}/callbacktest", handleCallbackTest)
+	r.HandleFunc("/{imgbaseurl}/uploaded", handleUploadedInBlobStore)
+	r.HandleFunc("/{imgbaseurl}/uploaded/complete", handleUploadComplete)
 
 	// ImgProfile
-	r.HandleFunc("/imgProfiles", handleGetAllProfiles).Methods("GET")
-	r.HandleFunc("/imgProfile", handleImgProfileStore).Methods("POST")
-	r.HandleFunc("/imgProfile/{name}", handleImgProfileDelete).Methods("DELETE")
-	r.HandleFunc("/imgProfile/{name}", handleImgProfileGet).Methods("GET")
+	r.HandleFunc("/{imgbaseurl}/imgProfiles", handleGetAllProfiles).Methods("GET")
+	r.HandleFunc("/{imgbaseurl}/imgProfile", handleImgProfileStore).Methods("POST")
+	r.HandleFunc("/{imgbaseurl}/imgProfile/{name}", handleImgProfileDelete).Methods("DELETE")
+	r.HandleFunc("/{imgbaseurl}/imgProfile/{name}", handleImgProfileGet).Methods("GET")
 
 	// ImageInGAR
-	r.HandleFunc("/image/{entityId}/{profileName}", handleGetImage).Methods("GET")
-	r.HandleFunc("/image/{entityId}/{profileName}", handleDeleteImage).Methods("DELETE")
-	r.HandleFunc("/image/{entityId}", handleDeleteImageAllProfile).Methods("DELETE")
+	r.HandleFunc("/{imgbaseurl}/image/{entityId}/{profileName}", handleGetImage).Methods("GET")
+	r.HandleFunc("/{imgbaseurl}/image/{entityId}/{profileName}", handleDeleteImage).Methods("DELETE")
+	r.HandleFunc("/{imgbaseurl}/image/{entityId}", handleDeleteImageAllProfile).Methods("DELETE")
 	// ImageTask
-	r.HandleFunc("/image/taskDelete", handleDeleteImageTask).Methods("POST")
+	r.HandleFunc("/{imgbaseurl}/image/taskDelete", handleDeleteImageTask).Methods("POST")
 	http.Handle("/", r)
 }

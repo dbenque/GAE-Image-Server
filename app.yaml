@@ -1,8 +1,9 @@
-application: gae-image-server 
-version: 3
+application: gae-image-server
+module: module-img
+version: 4
 runtime: go
 api_version: go1
 
 handlers:
-- url: /.*
+- url: /img/.*
   script: _go_app

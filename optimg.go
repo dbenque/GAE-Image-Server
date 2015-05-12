@@ -36,10 +36,6 @@ import (
 	"net/url"
 	"strings"
 
-	// 3rd-party
-	// By "Go Authors"
-	"github.com/dbenque/GAE-Image-Server/resize"
-
 	// App Engine packages
 	"appengine"
 	"appengine/blobstore"
@@ -158,7 +154,7 @@ func handleBlob(options *compressionOptions, blobOriginal *blobstore.BlobInfo) (
 			size_y = options.Size
 			size_x = int(math.Floor(float64(size_x) * float64(float64(size_y)/float64(size_y_before))))
 		}
-		img = resizeImage.Resize(img, img.Bounds(), size_x, size_y)
+		img = Resize(img, img.Bounds(), size_x, size_y)
 	}
 
 	var newKey appengine.BlobKey

@@ -8,8 +8,6 @@ import (
 	"math"
 	"net/http"
 
-	"github.com/dbenque/GAE-Image-Server/resize"
-
 	"github.com/gorilla/mux"
 
 	"appengine"
@@ -70,14 +68,14 @@ func handleDeleteImageAllProfile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	q := datastore.NewQuery(imageKind).Filter("EntityId =", vars["entityId"])
-	if err := CreateTasksToDeleteImages(c, q); err != nil {
+	if err := CreateTasksToDeleteImages(c, q, vars["imgbaseurl"]); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 
 }
-func CreateTasksToDeleteImages(context appengine.Context, q *datastore.Query) error {
+func CreateTasksToDeleteImages(context appengine.Context, q *datastore.Query, baseurl string) error {
 
 	t := q.Run(context)
 	for {
@@ -91,7 +89,7 @@ func CreateTasksToDeleteImages(context appengine.Context, q *datastore.Query) er
 			break
 		}
 
-		t := taskqueue.NewPOSTTask("/image/taskDelete", map[string][]string{"entityId": {p.EntityId}, "profileName": {p.ProfileName}})
+		t := taskqueue.NewPOSTTask("/"+baseurl+"/image/taskDelete", map[string][]string{"entityId": {p.EntityId}, "profileName": {p.ProfileName}})
 		if _, err := taskqueue.Add((context), t, ""); err != nil {
 			return err
 		}
@@ -174,7 +172,7 @@ func (p *ImageInGAE) createResizedImage(context appengine.Context, targetProfile
 			size_y = targetProfile.MaxSize
 			size_x = int(math.Floor(float64(size_x) * float64(float64(size_y)/float64(size_y_before))))
 		}
-		img = resizeImage.Resize(img, img.Bounds(), size_x, size_y)
+		img = Resize(img, img.Bounds(), size_x, size_y)
 	}
 	// JPEG options
 	o := &jpeg.Options{Quality: targetProfile.Quality}
